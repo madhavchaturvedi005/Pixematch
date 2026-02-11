@@ -7,13 +7,13 @@ const app = express();
 const server = http.createServer(app);
 
 app.use(cors({
-  origin: '*', 
+  origin: ['http://localhost:5173', 'https://pixematch.vercel.app', 'http://13.62.56.87:3001'], 
   credentials: true
 }));
 
 const io = socketIo(server, {
   cors: {
-    origin: '*', 
+    origin: ['http://localhost:5173', 'https://pixematch.vercel.app', 'http://13.62.56.87:3001'], 
     methods: ["GET", "POST"],
     credentials: true
   },

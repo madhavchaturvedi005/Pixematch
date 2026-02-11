@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import { 
   Camera, MapPin, Save, Video, Heart, Gamepad2, BookOpen, Briefcase,
-  Sparkles, TrendingUp, Award, CheckCircle2
+  Sparkles, TrendingUp, Award, CheckCircle2, User, Settings, Bell, Shield, LogOut
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -36,7 +36,7 @@ const MODE_OPTIONS = [
 ];
 
 const Profile = () => {
-  const { user, updateProfile, isLoggedIn } = useAuth();
+  const { user, updateProfile, isLoggedIn, logout } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState(user?.name || "");
   const [bio, setBio] = useState(user?.bio || "");
@@ -47,6 +47,7 @@ const Profile = () => {
   const [idealPartnerDescription, setIdealPartnerDescription] = useState(user?.idealPartnerDescription || "");
   const [mode, setMode] = useState<"dating" | "friendship" | "study" | "co-founder">(user?.mode || "dating");
   const [saved, setSaved] = useState(false);
+  const [activeTab, setActiveTab] = useState("profile");
 
   if (!isLoggedIn) {
     navigate("/login");
@@ -80,17 +81,102 @@ const Profile = () => {
 
   const profileLevel = getProfileLevel();
 
+  const sidebarItems = [
+    { id: "profile", label: "Profile", icon: User },
+    { id: "features", label: "Features", icon: Sparkles },
+    { id: "settings", label: "Settings", icon: Settings },
+    { id: "notifications", label: "Notifications", icon: Bell },
+    { id: "privacy", label: "Privacy", icon: Shield },
+  ];
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-pink-deep/10">
       <Navbar />
-      <div className="max-w-4xl mx-auto px-4 pt-28 pb-16">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          transition={{ duration: 0.5 }}
-        >
-          {/* Profile Header Card */}
-          <Card className="p-8 mb-6 bg-card/50 backdrop-blur-sm border-border/50">
+      <div className="max-w-7xl mx-auto px-4 pt-28 pb-16">
+        <div className="flex gap-6">
+          {/* Sidebar */}
+          <motion.aside
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="hidden lg:block w-64 flex-shrink-0"
+          >
+            <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/50 sticky top-28">
+              {/* User Info */}
+              <div className="text-center mb-6 pb-6 border-b border-border/50">
+                <div className="w-20 h-20 mx-auto mb-3 rounded-full bg-gradient-to-br from-primary to-pink-deep flex items-center justify-center text-2xl font-heading font-bold text-white shadow-lg">
+                  {name.charAt(0).toUpperCase() || "?"}
+                </div>
+                <h3 className="font-heading font-semibold text-foreground mb-1">
+                  {name || "Your Name"}
+                </h3>
+                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                <Badge className="mt-2 bg-gradient-to-r from-primary to-pink-deep text-white">
+                  {profileLevel.level}
+                </Badge>
+              </div>
+
+              {/* Navigation */}
+              <nav className="space-y-2 mb-6">
+                {sidebarItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                      activeTab === item.id
+                        ? "bg-primary text-primary-foreground shadow-md"
+                        : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    }`}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    <span className="font-medium">{item.label}</span>
+                  </button>
+                ))}
+              </nav>
+
+              {/* Stats */}
+              <div className="space-y-3 mb-6 pb-6 border-b border-border/50">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Profile Strength</span>
+                  <span className="font-semibold text-primary">{profileCompleteness}%</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Interests</span>
+                  <Badge variant="secondary">{interests.length}</Badge>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Values</span>
+                  <Badge variant="secondary">{values.length}</Badge>
+                </div>
+              </div>
+
+              {/* Logout Button */}
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={handleLogout}
+              >
+                <LogOut className="w-5 h-5" />
+                Log out
+              </Button>
+            </Card>
+          </motion.aside>
+
+          {/* Main Content */}
+          <div className="flex-1">
+            {activeTab === "profile" && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              transition={{ duration: 0.5 }}
+            >
+              {/* Profile Header Card */}
+              <Card className="p-8 mb-6 bg-card/50 backdrop-blur-sm border-border/50">
             <div className="flex flex-col lg:flex-row items-center gap-8">
               {/* Avatar */}
               <div className="relative group">
@@ -145,16 +231,6 @@ const Profile = () => {
                   )}
                 </div>
               </div>
-
-              {/* CTA Button */}
-              <Button 
-                size="lg"
-                className="gap-2 bg-primary hover:bg-pink-deep text-primary-foreground glow-pink shadow-xl font-heading font-semibold" 
-                onClick={() => navigate("/matching")}
-              >
-                <Video className="w-5 h-5" />
-                Start Matching
-              </Button>
             </div>
           </Card>
 
@@ -332,6 +408,127 @@ const Profile = () => {
             </div>
           </Card>
         </motion.div>
+            )}
+
+            {activeTab === "features" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="space-y-6"
+              >
+                <Card className="p-8 bg-card/50 backdrop-blur-sm border-border/50">
+                  <h2 className="text-2xl font-heading font-bold text-foreground mb-6 flex items-center gap-2">
+                    <Sparkles className="w-6 h-6 text-primary" />
+                    Premium Features
+                  </h2>
+                  
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {/* Feature 1 */}
+                    <div className="p-6 rounded-xl bg-gradient-to-br from-primary/10 to-pink-deep/10 border border-primary/20">
+                      <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
+                        <Video className="w-6 h-6 text-primary" />
+                      </div>
+                      <h3 className="text-lg font-heading font-semibold text-foreground mb-2">HD Video Chat</h3>
+                      <p className="text-sm text-muted-foreground">Crystal clear video quality for better connections</p>
+                    </div>
+
+                    {/* Feature 2 */}
+                    <div className="p-6 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/20">
+                      <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mb-4">
+                        <Sparkles className="w-6 h-6 text-blue-500" />
+                      </div>
+                      <h3 className="text-lg font-heading font-semibold text-foreground mb-2">AI Matching</h3>
+                      <p className="text-sm text-muted-foreground">Smart algorithm finds your perfect match</p>
+                    </div>
+
+                    {/* Feature 3 */}
+                    <div className="p-6 rounded-xl bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/20">
+                      <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center mb-4">
+                        <Shield className="w-6 h-6 text-green-500" />
+                      </div>
+                      <h3 className="text-lg font-heading font-semibold text-foreground mb-2">Safe & Secure</h3>
+                      <p className="text-sm text-muted-foreground">Your privacy and safety is our priority</p>
+                    </div>
+
+                    {/* Feature 4 */}
+                    <div className="p-6 rounded-xl bg-gradient-to-br from-yellow-500/10 to-yellow-600/10 border border-yellow-500/20">
+                      <div className="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center mb-4">
+                        <Heart className="w-6 h-6 text-yellow-500" />
+                      </div>
+                      <h3 className="text-lg font-heading font-semibold text-foreground mb-2">Multiple Modes</h3>
+                      <p className="text-sm text-muted-foreground">Dating, friendship, study partners & more</p>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Start Matching CTA */}
+                <Card className="p-8 bg-gradient-to-br from-primary/20 to-pink-deep/20 backdrop-blur-sm border-primary/30">
+                  <div className="text-center">
+                    <h3 className="text-2xl font-heading font-bold text-foreground mb-3">Ready to Connect?</h3>
+                    <p className="text-muted-foreground mb-6">Start matching with people who share your interests</p>
+                    <Button 
+                      size="lg"
+                      className="gap-2 bg-primary hover:bg-pink-deep text-primary-foreground glow-pink shadow-xl font-heading font-semibold" 
+                      onClick={() => navigate("/matching")}
+                    >
+                      <Video className="w-5 h-5" />
+                      Start Matching Now
+                    </Button>
+                  </div>
+                </Card>
+              </motion.div>
+            )}
+
+            {activeTab === "settings" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Card className="p-8 bg-card/50 backdrop-blur-sm border-border/50">
+                  <h2 className="text-2xl font-heading font-bold text-foreground mb-6 flex items-center gap-2">
+                    <Settings className="w-6 h-6 text-primary" />
+                    Settings
+                  </h2>
+                  <p className="text-muted-foreground">Settings panel coming soon...</p>
+                </Card>
+              </motion.div>
+            )}
+
+            {activeTab === "notifications" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Card className="p-8 bg-card/50 backdrop-blur-sm border-border/50">
+                  <h2 className="text-2xl font-heading font-bold text-foreground mb-6 flex items-center gap-2">
+                    <Bell className="w-6 h-6 text-primary" />
+                    Notifications
+                  </h2>
+                  <p className="text-muted-foreground">Notification settings coming soon...</p>
+                </Card>
+              </motion.div>
+            )}
+
+            {activeTab === "privacy" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Card className="p-8 bg-card/50 backdrop-blur-sm border-border/50">
+                  <h2 className="text-2xl font-heading font-bold text-foreground mb-6 flex items-center gap-2">
+                    <Shield className="w-6 h-6 text-primary" />
+                    Privacy & Security
+                  </h2>
+                  <p className="text-muted-foreground">Privacy settings coming soon...</p>
+                </Card>
+              </motion.div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
