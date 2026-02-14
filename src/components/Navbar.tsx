@@ -42,11 +42,17 @@ const Navbar = () => {
       <div className="flex items-center gap-8">
         <Link 
           to="/" 
-          className={`font-heading font-bold text-gradient-pink tracking-tight hover:scale-105 transition-all ${
-            isScrolled ? "text-xl" : "text-3xl"
+          className={`flex items-center gap-2 hover:scale-105 transition-all ${
+            isScrolled ? "" : ""
           }`}
         >
-          pixematch
+          <img 
+            src="/logo.png" 
+            alt="Pixematch" 
+            className={`transition-all ${
+              isScrolled ? "h-8" : "h-12"
+            }`}
+          />
         </Link>
         <div className="hidden md:flex items-center gap-6">
           <Link 

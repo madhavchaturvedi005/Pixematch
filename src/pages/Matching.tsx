@@ -266,12 +266,12 @@ const handleAcceptRequest = (request: MatchRequest) => {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       
-      <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 pt-24 overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 pt-28 lg:pt-24 overflow-hidden">
         {/* Main content - Online users */}
         <div className="flex-1 flex flex-col gap-4 min-w-0 lg:max-h-[calc(100vh-7rem)] overflow-hidden">
           <div className="flex items-center justify-between">
             <h2 className="text-xl lg:text-2xl font-heading font-bold text-foreground">
-              👥 Online Users ({onlineUsers.length})
+              Online Users ({onlineUsers.length})
             </h2>
               <Button
                 variant="outline"
@@ -298,7 +298,7 @@ const handleAcceptRequest = (request: MatchRequest) => {
               <div className="card-surface rounded-2xl p-12 text-center">
                 <UserIcon className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-heading font-bold text-foreground mb-2">No Users Online</h3>
-                <p className="text-muted-foreground">Open another tab to test matching!</p>
+                <p className="text-muted-foreground"></p>
               </div>
             </motion.div>
           ) : (

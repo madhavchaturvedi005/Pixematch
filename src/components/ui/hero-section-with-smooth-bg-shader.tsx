@@ -78,19 +78,6 @@ const HeroSection = () => {
       {/* Main content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 pt-20 pb-16">
         <div className="max-w-5xl mx-auto text-center">
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 mb-8 bg-primary/10 backdrop-blur-sm border border-primary/20 rounded-full"
-          >
-            <div className="w-2 h-2 bg-online-green rounded-full animate-pulse" />
-            <span className="text-sm font-medium text-foreground">
-              {onlineCount.toLocaleString()} people online now
-            </span>
-          </motion.div>
-
           {/* Main heading */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
