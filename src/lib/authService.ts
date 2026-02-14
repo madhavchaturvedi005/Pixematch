@@ -13,6 +13,19 @@ export const authService = {
       });
 
       if (!response.ok) {
+        console.error('Profile fetch failed:', response.status, response.statusText);
+        const text = await response.text();
+        console.error('Response body:', text.substring(0, 200));
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        return null;
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error('Invalid content type:', contentType);
+        const text = await response.text();
+        console.error('Response body:', text.substring(0, 200));
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         return null;

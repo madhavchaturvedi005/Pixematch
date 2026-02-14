@@ -28,10 +28,24 @@ const UserGrid = () => {
       try {
         const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
         const response = await fetch(`${backendUrl}/api/users`);
+        
+        if (!response.ok) {
+          console.error('Failed to fetch users:', response.status, response.statusText);
+          return;
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          console.error('Invalid content type from /api/users:', contentType);
+          const text = await response.text();
+          console.error('Response body:', text.substring(0, 200));
+          return;
+        }
+
         const data = await response.json();
         
         // Filter out current user if logged in
-        const filteredUsers = user ? data.filter((u: User) => u.name !== user.name) : data;
+        const filteredUsers = user ? data.filter((u: User) => u.name !== user.username) : data;
         setUsers(filteredUsers);
       } catch (error) {
         console.error('Failed to fetch users:', error);
