@@ -32,6 +32,11 @@ const activeMatches = new Map();
 const videoChatUsers = new Map(); // Users in video chat
 const browsingUsers = new Map(); // Users just browsing/on matching page
 
+// Friend request system
+const friendRequests = new Map(); // requestId -> request data
+const userSockets = new Map(); // userId -> socketId
+const blockedPairs = new Set(); // Set of "userId1:userId2" pairs
+
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
@@ -141,6 +146,92 @@ io.on('connection', (socket) => {
 
   socket.on('stop', () => {
     handleStop(socket);
+  });
+
+  // Friend Request System
+  socket.on('register-friend-system', ({ userId }) => {
+    userSockets.set(userId, socket.id);
+    console.log(`User ${userId} registered for friend requests`);
+  });
+
+  socket.on('send-friend-request', ({ fromUserId, toUserId, toUserName, toUserAge }) => {
+    const pairKey = `${fromUserId}:${toUserId}`;
+    const reversePairKey = `${toUserId}:${fromUserId}`;
+    
+    // Check if users are blocked
+    if (blockedPairs.has(pairKey) || blockedPairs.has(reversePairKey)) {
+      console.log('Users are blocked from matching');
+      return;
+    }
+
+    const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const fromUser = browsingUsers.get(userSockets.get(fromUserId)) || videoChatUsers.get(userSockets.get(fromUserId));
+    
+    if (!fromUser) return;
+
+    const request = {
+      id: requestId,
+      fromUserId,
+      fromUserName: fromUser.name,
+      fromUserAge: fromUser.age,
+      fromUserInterests: fromUser.interests || [],
+      toUserId,
+      timestamp: Date.now(),
+      status: 'pending'
+    };
+
+    friendRequests.set(requestId, request);
+
+    // Send to recipient
+    const toSocketId = userSockets.get(toUserId);
+    if (toSocketId) {
+      io.to(toSocketId).emit('friend-request-received', request);
+    }
+  });
+
+  socket.on('accept-friend-request', ({ requestId }) => {
+    const request = friendRequests.get(requestId);
+    if (!request) return;
+
+    request.status = 'accepted';
+    
+    // Create a room for them
+    const roomId = `room_${Date.now()}`;
+    
+    // Notify both users
+    const fromSocketId = userSockets.get(request.fromUserId);
+    const toSocketId = socket.id;
+    
+    if (fromSocketId) {
+      io.to(fromSocketId).emit('friend-request-accepted', { requestId, roomId });
+    }
+    io.to(toSocketId).emit('friend-request-accepted', { requestId, roomId });
+
+    // Clean up request
+    friendRequests.delete(requestId);
+  });
+
+  socket.on('cancel-friend-request', ({ requestId }) => {
+    const request = friendRequests.get(requestId);
+    if (!request) return;
+
+    request.status = 'cancelled';
+    
+    // Block this pair from future matching
+    const pairKey = `${request.fromUserId}:${request.toUserId}`;
+    blockedPairs.add(pairKey);
+    
+    // Notify the other user
+    const fromSocketId = userSockets.get(request.fromUserId);
+    if (fromSocketId) {
+      io.to(fromSocketId).emit('friend-request-cancelled', { 
+        requestId, 
+        userId: request.toUserId 
+      });
+    }
+
+    // Clean up request
+    friendRequests.delete(requestId);
   });
 
   socket.on('disconnect', () => {

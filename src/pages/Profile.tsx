@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
+import { useFriendRequests } from "@/hooks/useFriendRequests";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
+import { RequestSidebar } from "@/components/RequestSidebar";
 import { 
   Camera, MapPin, Save, Video, Heart, Gamepad2, BookOpen, Briefcase,
   Sparkles, TrendingUp, Award, CheckCircle2, User, Settings, Bell, Shield, LogOut
@@ -38,6 +40,7 @@ const MODE_OPTIONS = [
 const Profile = () => {
   const { user, updateProfile, isLoggedIn, logout } = useAuth();
   const navigate = useNavigate();
+  const { requests, acceptRequest, cancelRequest } = useFriendRequests(user?.id);
   const [name, setName] = useState(user?.name || "");
   const [bio, setBio] = useState(user?.bio || "");
   const [country, setCountry] = useState(user?.country || "");
@@ -528,6 +531,13 @@ const Profile = () => {
               </motion.div>
             )}
           </div>
+
+          {/* Request Sidebar */}
+          <RequestSidebar
+            requests={requests}
+            onAccept={acceptRequest}
+            onCancel={cancelRequest}
+          />
         </div>
       </div>
     </div>

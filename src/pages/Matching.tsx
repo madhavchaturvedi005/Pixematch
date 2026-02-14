@@ -3,16 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserPresence } from "@/hooks/useUserPresence";
+import { useFriendRequests } from "@/hooks/useFriendRequests";
 import Navbar from "@/components/Navbar";
 import ScanningRadar from "@/components/ScanningRadar";
+import { RequestSidebar } from "@/components/RequestSidebar";
 import { computeMatch, MatchUser } from "@/lib/mockMatches";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Zap, Brain, MessageSquare, Video, MapPin, SkipForward } from "lucide-react";
+import { Heart, Zap, Brain, MessageSquare, Video, MapPin, SkipForward, UserPlus } from "lucide-react";
 
 const Matching = () => {
   const { user, isLoggedIn } = useAuth();
   const navigate = useNavigate();
+  const { requests, sendFriendRequest, acceptRequest, cancelRequest, sentRequests } = useFriendRequests(user?.id);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<"left" | "right" | null>(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -118,8 +121,15 @@ const Matching = () => {
 
   const handleMatch = () => {
     if (!current) return;
-    // Navigate to video chat instead of just marking as matched
-    navigate("/chat/new");
+    // Send match request instead of direct navigation
+    sendFriendRequest(current.user.id, current.user.name, current.user.age);
+    // Swipe to next profile
+    setDirection("right");
+    setShowDetails(false);
+    setTimeout(() => {
+      setCurrentIndex((i) => i + 1);
+      setDirection(null);
+    }, 300);
   };
 
   const getScoreColor = (score: number) => {
@@ -131,17 +141,20 @@ const Matching = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="max-w-lg mx-auto px-4 pt-28 pb-16">
-        {/* Matched count */}
-        {matchedUsers.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-4 text-center"
-          >
-            <span className="pixel-tag text-primary">{matchedUsers.length} MATCH{matchedUsers.length > 1 ? "ES" : ""}</span>
-          </motion.div>
-        )}
+      <div className="max-w-7xl mx-auto px-4 pt-28 pb-16">
+        <div className="flex gap-6">
+          {/* Main Content */}
+          <div className="flex-1 max-w-lg mx-auto">
+            {/* Matched count */}
+            {matchedUsers.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-4 text-center"
+              >
+                <span className="pixel-tag text-primary">{matchedUsers.length} MATCH{matchedUsers.length > 1 ? "ES" : ""}</span>
+              </motion.div>
+            )}
 
         <AnimatePresence mode="wait">
           {isFinished ? (
@@ -332,6 +345,15 @@ const Matching = () => {
             ))}
           </div>
         )}
+          </div>
+
+          {/* Request Sidebar */}
+          <RequestSidebar
+            requests={requests}
+            onAccept={acceptRequest}
+            onCancel={cancelRequest}
+          />
+        </div>
       </div>
     </div>
   );
