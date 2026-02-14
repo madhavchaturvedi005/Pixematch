@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Github, Linkedin, Mail } from "lucide-react";
+import { Instagram, Linkedin, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -7,20 +7,20 @@ import Footer from "@/components/Footer";
 const About = () => {
   const developers = [
     {
-      name: "Saish",
+      name: "Saish Mungase",
       role: "Full Stack Developer",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Saish",
-      github: "https://github.com/saish",
-      linkedin: "https://linkedin.com/in/saish",
+      image: "/about-profile/saish.jpg",
+      instagram: "https://www.instagram.com/just_saish/",
+      linkedin: "https://www.linkedin.com/in/saish-mungase/",
       email: "saish@example.com",
       bio: "Passionate about building scalable web applications and creating seamless user experiences."
     },
     {
-      name: "Madhav",
+      name: "Madhav Chaturvedi",
       role: "Full Stack Developer",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Madhav",
-      github: "https://github.com/madhav",
-      linkedin: "https://linkedin.com/in/madhav",
+      image: "/about-profile/madhav.jpg",
+      instagram: "https://www.instagram.com/_madhav.chaturvedi_/",
+      linkedin: "https://www.linkedin.com/in/madhav-chaturvedi05/",
       email: "madhav@example.com",
       bio: "Enthusiastic developer focused on innovative solutions and modern web technologies."
     }
@@ -85,10 +85,10 @@ const About = () => {
                       variant="outline"
                       size="sm"
                       className="flex-1 gap-2 hover:bg-primary hover:text-primary-foreground transition-colors"
-                      onClick={() => window.open(dev.github, '_blank')}
+                      onClick={() => window.open(dev.instagram, '_blank')}
                     >
-                      <Github className="w-4 h-4" />
-                      GitHub
+                      <Instagram className="w-4 h-4" />
+                      Instagram
                     </Button>
                     <Button
                       variant="outline"

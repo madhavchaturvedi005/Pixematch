@@ -1,4 +1,4 @@
-import { User, LogIn, ChevronDown } from "lucide-react";
+import { User, LogIn, ChevronDown, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -115,6 +115,28 @@ const Navbar = () => {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
+              
+              {/* Mobile only menu items */}
+              <div className="md:hidden">
+                <DropdownMenuItem 
+                  onClick={() => navigate("/matching")}
+                  className="cursor-pointer text-sm"
+                >
+                  <Heart className="w-4 h-4 mr-2" />
+                  Find Match
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => navigate("/about")}
+                  className="cursor-pointer text-sm"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  About
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </div>
+              
               <DropdownMenuItem 
                 onClick={() => navigate("/profile")}
                 className="cursor-pointer text-sm"

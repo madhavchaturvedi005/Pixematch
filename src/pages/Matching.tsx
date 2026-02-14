@@ -6,7 +6,7 @@ import { useGlobalSocket } from "@/hooks/useGlobalSocket";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Video, MapPin, User as UserIcon, X, Check } from "lucide-react";
+import { Heart, Video, MapPin, User as UserIcon, X, Check, ChevronDown, ChevronUp } from "lucide-react";
 
 interface OnlineUser {
   id: string;
@@ -40,6 +40,7 @@ const Matching = () => {
   const [incomingRequests, setIncomingRequests] = useState<MatchRequest[]>([]);
   const [sentRequests, setSentRequests] = useState<string[]>([]);
   const [activeMatch, setActiveMatch] = useState<OnlineUser | null>(null);
+  const [showMobileRequests, setShowMobileRequests] = useState(true);
 
 useEffect(() => {
   if (!socket) return;
@@ -265,15 +266,16 @@ const handleAcceptRequest = (request: MatchRequest) => {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       
-      <div className="flex-1 flex gap-4 p-4 pt-24 overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 pt-24 overflow-hidden">
         {/* Main content - Online users */}
-        <div className="flex-1 flex flex-col gap-4 min-w-0">
+        <div className="flex-1 flex flex-col gap-4 min-w-0 lg:max-h-[calc(100vh-7rem)] overflow-hidden">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-heading font-bold text-foreground">
+            <h2 className="text-xl lg:text-2xl font-heading font-bold text-foreground">
               👥 Online Users ({onlineUsers.length})
             </h2>
               <Button
                 variant="outline"
+                size="sm"
                 onClick={() => {
                   setIsMatching(false);
                   setSentRequests([]);
@@ -283,7 +285,7 @@ const handleAcceptRequest = (request: MatchRequest) => {
                   }
                 }}
               >
-                Exit Matching
+                Exit
               </Button>
           </div>
 
@@ -383,11 +385,11 @@ const handleAcceptRequest = (request: MatchRequest) => {
           )}
         </div>
 
-        {/* Right sidebar - Incoming requests */}
+        {/* Right sidebar - Incoming requests - Hidden on mobile, shown on desktop */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="w-80 bg-card rounded-2xl p-4 border border-border flex flex-col"
+          className="hidden lg:flex lg:w-80 bg-card rounded-2xl p-4 border border-border flex-col max-h-[calc(100vh-7rem)]"
         >
           <h3 className="text-lg font-heading font-bold text-foreground mb-4">
             💌 Match Requests ({incomingRequests.length})
@@ -456,6 +458,95 @@ const handleAcceptRequest = (request: MatchRequest) => {
             </div>
           )}
         </motion.div>
+
+        {/* Mobile Match Requests - Fixed bottom sheet with toggle */}
+        {incomingRequests.length > 0 && (
+          <>
+            {/* Toggle Button - Always visible */}
+            <button
+              onClick={() => setShowMobileRequests(!showMobileRequests)}
+              className="lg:hidden fixed bottom-4 right-4 w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform z-50"
+            >
+              {showMobileRequests ? (
+                <ChevronDown className="w-7 h-7 text-white" />
+              ) : (
+                <ChevronUp className="w-7 h-7 text-white" />
+              )}
+            </button>
+
+            {/* Bottom Sheet */}
+            <motion.div
+              initial={{ y: showMobileRequests ? 0 : 500 }}
+              animate={{ y: showMobileRequests ? 0 : 500 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t-2 border-border rounded-t-3xl shadow-2xl z-40"
+            >
+              {/* Content */}
+              <div className="p-4 pb-20 max-h-[50vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-base font-heading font-bold text-foreground">
+                    💌 Match Requests ({incomingRequests.length})
+                  </h3>
+                  <div className="w-12 h-1 bg-border rounded-full" />
+                </div>
+
+                <div className="space-y-3">
+                  <AnimatePresence>
+                    {incomingRequests.map((request) => (
+                      <motion.div
+                        key={request.fromSocketId}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="bg-background rounded-lg p-3 border border-border"
+                      >
+                        <div className="mb-3">
+                          <div className="flex items-center gap-2 mb-1">
+                            <div className="w-10 h-10 rounded-full bg-primary/30 flex items-center justify-center font-bold">
+                              {request.from.name[0]}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-sm text-foreground">
+                                {request.from.name}, {request.from.age}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Wants to match with you
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <p className="text-xs text-muted-foreground line-clamp-2 ml-12">
+                            {request.from.bio}
+                          </p>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => handleAcceptRequest(request)}
+                            size="sm"
+                            className="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs"
+                          >
+                            <Check className="w-3 h-3 mr-1" />
+                            Accept
+                          </Button>
+                          <Button
+                            onClick={() => handleDeclineRequest(request)}
+                            size="sm"
+                            variant="outline"
+                            className="flex-1 text-xs"
+                          >
+                            <X className="w-3 h-3 mr-1" />
+                            Decline
+                          </Button>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
       </div>
     </div>
   );
