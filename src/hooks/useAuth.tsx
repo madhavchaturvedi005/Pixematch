@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 
 export interface AuthUser {
+  id?: string;
   name: string;
   email: string;
   avatar?: string;
@@ -37,18 +38,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (saved) {
       const parsed = JSON.parse(saved);
       if (parsed.email === email) {
+        // Add ID if it doesn't exist (for existing users)
+        if (!parsed.id) {
+          parsed.id = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          localStorage.setItem("pixematch_user", JSON.stringify(parsed));
+        }
         setUser(parsed);
         return true;
       }
     }
-    const newUser: AuthUser = { name: email.split("@")[0], email };
+    const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const newUser: AuthUser = { id: userId, name: email.split("@")[0], email };
     setUser(newUser);
     localStorage.setItem("pixematch_user", JSON.stringify(newUser));
     return true;
   }, []);
 
   const signup = useCallback((name: string, email: string, _password: string) => {
-    const newUser: AuthUser = { name, email };
+    const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const newUser: AuthUser = { id: userId, name, email };
     setUser(newUser);
     localStorage.setItem("pixematch_user", JSON.stringify(newUser));
     return true;

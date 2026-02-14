@@ -20,7 +20,12 @@ export const useFriendRequests = (userId: string | undefined) => {
   const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      console.log('No userId provided to useFriendRequests');
+      return;
+    }
+
+    console.log('Initializing friend requests for user:', userId);
 
     const newSocket = io(BACKEND_URL, {
       reconnection: true,
@@ -34,7 +39,12 @@ export const useFriendRequests = (userId: string | undefined) => {
 
     // Receive friend request
     newSocket.on('friend-request-received', (request: FriendRequest) => {
-      setRequests(prev => [...prev, request]);
+      console.log('Received friend request:', request);
+      setRequests(prev => {
+        console.log('Current requests:', prev);
+        console.log('Adding new request:', request);
+        return [...prev, request];
+      });
     });
 
     // Request accepted by other user
@@ -58,8 +68,13 @@ export const useFriendRequests = (userId: string | undefined) => {
   }, [userId]);
 
   const sendFriendRequest = (toUserId: string, toUserName: string, toUserAge: number) => {
-    if (!socket || !userId) return;
+    if (!socket || !userId) {
+      console.log('Cannot send request: socket or userId missing', { socket: !!socket, userId });
+      return;
+    }
 
+    console.log('Sending friend request:', { fromUserId: userId, toUserId, toUserName });
+    
     socket.emit('send-friend-request', {
       fromUserId: userId,
       toUserId,

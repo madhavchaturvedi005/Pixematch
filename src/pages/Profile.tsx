@@ -40,7 +40,8 @@ const MODE_OPTIONS = [
 const Profile = () => {
   const { user, updateProfile, isLoggedIn, logout } = useAuth();
   const navigate = useNavigate();
-  const { requests, acceptRequest, cancelRequest } = useFriendRequests(user?.id);
+  const userId = user?.id || user?.email;
+  const { requests, acceptRequest, cancelRequest } = useFriendRequests(userId);
   const [name, setName] = useState(user?.name || "");
   const [bio, setBio] = useState(user?.bio || "");
   const [country, setCountry] = useState(user?.country || "");

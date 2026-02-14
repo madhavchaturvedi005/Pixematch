@@ -76,8 +76,12 @@ export const RequestSidebar = ({ requests, onAccept, onCancel }: RequestSidebarP
         </div>
 
         {/* Debug info - remove in production */}
-        <div className="mb-4 p-2 bg-secondary/50 rounded text-xs text-muted-foreground">
-          Debug: {requests.length} matches loaded
+        <div className="mb-4 p-3 bg-secondary/50 rounded text-xs space-y-1">
+          <div className="text-muted-foreground">Debug Info:</div>
+          <div className="text-foreground">Matches: {requests.length}</div>
+          <div className="text-muted-foreground text-[10px] max-h-20 overflow-auto">
+            {JSON.stringify(requests, null, 2)}
+          </div>
         </div>
 
         <div className="space-y-4 max-h-[600px] overflow-y-auto">

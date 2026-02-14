@@ -7,13 +7,13 @@ const app = express();
 const server = http.createServer(app);
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://pixematch.vercel.app', 'http://13.62.56.87:3001'], 
+  origin: ['http://localhost:5173', 'http://localhost:8080', 'https://pixematch.vercel.app', 'http://13.62.56.87:3001', 'https://pixematch.madhavchaturvedi.me'], 
   credentials: true
 }));
 
 const io = socketIo(server, {
   cors: {
-    origin: ['http://localhost:5173', 'https://pixematch.vercel.app', 'http://13.62.56.87:3001'], 
+    origin: ['http://localhost:5173', 'http://localhost:8080', 'https://pixematch.vercel.app', 'http://13.62.56.87:3001', 'https://pixematch.madhavchaturvedi.me'], 
     methods: ["GET", "POST"],
     credentials: true
   },
@@ -167,25 +167,79 @@ io.on('connection', (socket) => {
     const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const fromUser = browsingUsers.get(userSockets.get(fromUserId)) || videoChatUsers.get(userSockets.get(fromUserId));
     
-    if (!fromUser) return;
+    if (!fromUser) {
+      console.log('From user not found');
+      return;
+    }
 
-    const request = {
-      id: requestId,
-      fromUserId,
-      fromUserName: fromUser.name,
-      fromUserAge: fromUser.age,
-      fromUserInterests: fromUser.interests || [],
-      toUserId,
-      timestamp: Date.now(),
-      status: 'pending'
-    };
+    // Check if there's already a request from the other user
+    let existingRequest = null;
+    for (const [id, req] of friendRequests.entries()) {
+      if (req.fromUserId === toUserId && req.toUserId === fromUserId && req.status === 'pending') {
+        existingRequest = { id, ...req };
+        break;
+      }
+    }
 
-    friendRequests.set(requestId, request);
+    if (existingRequest) {
+      // MUTUAL MATCH! Both users swiped right
+      console.log(`Mutual match between ${fromUserId} and ${toUserId}`);
+      
+      // Create match request for both users
+      const matchRequest = {
+        id: requestId,
+        fromUserId: toUserId,
+        fromUserName: existingRequest.fromUserName,
+        fromUserAge: existingRequest.fromUserAge,
+        fromUserInterests: existingRequest.fromUserInterests || [],
+        toUserId: fromUserId,
+        timestamp: Date.now(),
+        status: 'matched'
+      };
 
-    // Send to recipient
-    const toSocketId = userSockets.get(toUserId);
-    if (toSocketId) {
-      io.to(toSocketId).emit('friend-request-received', request);
+      const reverseMatchRequest = {
+        id: existingRequest.id,
+        fromUserId,
+        fromUserName: fromUser.name,
+        fromUserAge: fromUser.age,
+        fromUserInterests: fromUser.interests || [],
+        toUserId,
+        timestamp: Date.now(),
+        status: 'matched'
+      };
+
+      // Send to both users
+      const fromSocketId = userSockets.get(fromUserId);
+      const toSocketId = userSockets.get(toUserId);
+      
+      if (fromSocketId) {
+        io.to(fromSocketId).emit('friend-request-received', matchRequest);
+        console.log(`Sent match to ${fromUserId}`);
+      }
+      if (toSocketId) {
+        io.to(toSocketId).emit('friend-request-received', reverseMatchRequest);
+        console.log(`Sent match to ${toUserId}`);
+      }
+
+      // Store both match requests
+      friendRequests.set(requestId, matchRequest);
+      friendRequests.set(existingRequest.id, reverseMatchRequest);
+      
+    } else {
+      // Just store the request, waiting for mutual match
+      const request = {
+        id: requestId,
+        fromUserId,
+        fromUserName: fromUser.name,
+        fromUserAge: fromUser.age,
+        fromUserInterests: fromUser.interests || [],
+        toUserId,
+        timestamp: Date.now(),
+        status: 'pending'
+      };
+
+      friendRequests.set(requestId, request);
+      console.log(`Stored pending request from ${fromUserId} to ${toUserId}`);
     }
   });
 

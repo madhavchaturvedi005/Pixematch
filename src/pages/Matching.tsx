@@ -15,7 +15,9 @@ import { Heart, Zap, Brain, MessageSquare, Video, MapPin, SkipForward, UserPlus 
 const Matching = () => {
   const { user, isLoggedIn } = useAuth();
   const navigate = useNavigate();
-  const { requests, sendFriendRequest, acceptRequest, cancelRequest, sentRequests } = useFriendRequests(user?.id);
+  // Use user.id if available, otherwise fallback to email as unique identifier
+  const userId = user?.id || user?.email;
+  const { requests, sendFriendRequest, acceptRequest, cancelRequest, sentRequests } = useFriendRequests(userId);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<"left" | "right" | null>(null);
   const [showDetails, setShowDetails] = useState(false);
