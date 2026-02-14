@@ -93,6 +93,8 @@ export const authService = {
   },
 
   async login(username: string, password: string) {
+    console.log('🔐 Attempting login for:', username);
+    
     const response = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -101,14 +103,18 @@ export const authService = {
 
     if (!response.ok) {
       const error = await response.json();
+      console.error('❌ Login failed:', error);
       throw new Error(error.error || 'Login failed');
     }
 
     const result = await response.json();
+    console.log('✅ Login successful, token received');
     
     localStorage.setItem('token', result.token);
     
+    console.log('📥 Fetching user profile...');
     const userProfile = await this.getCurrentUser();
+    console.log('✅ User profile loaded:', userProfile);
     
     return userProfile;
   },

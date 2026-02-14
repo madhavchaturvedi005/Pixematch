@@ -17,6 +17,9 @@ interface OnlineUser {
   interests: string[];
   country: string;
   socketId: string;
+  image1?: string;
+  image2?: string;
+  image3?: string;
 }
 
 interface MatchRequest {
@@ -160,7 +163,10 @@ useEffect(() => {
       interests: user.interests || [],
       bio: user.description || `Hi, I'm ${user.username}!`,
       description: user.description,
-      country: user.country || 'Unknown'
+      country: user.country || 'Unknown',
+      image1: user.image1 || null,
+      image2: user.image2 || null,
+      image3: user.image3 || null
     });
 
     console.log('✅ Registered for matching:', user.username);
@@ -259,11 +265,11 @@ const handleAcceptRequest = (request: MatchRequest) => {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       
-      <div className="flex-1 flex gap-4 p-4 pt-20 overflow-hidden">
+      <div className="flex-1 flex gap-4 p-4 pt-24 overflow-hidden">
         {/* Main content - Online users */}
         <div className="flex-1 flex flex-col gap-4 min-w-0">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-heading font-bold text-foreground">
+            <h2 className="text-2xl font-heading font-bold text-foreground">
               👥 Online Users ({onlineUsers.length})
             </h2>
               <Button
@@ -295,55 +301,83 @@ const handleAcceptRequest = (request: MatchRequest) => {
             </motion.div>
           ) : (
             <div className="flex-1 overflow-y-auto pr-2">
-              <div className="space-y-3">
-                {onlineUsers.map((onlineUser) => (
-                  <motion.div
-                    key={onlineUser.socketId}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="card-surface rounded-xl p-4 hover:bg-card/80 transition-colors"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3 flex-1">
-                        <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center font-bold text-lg">
-                          {onlineUser.name[0]}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {onlineUsers.map((onlineUser) => {
+                  const userImage = onlineUser.image1 || `https://api.dicebear.com/7.x/avataaars/svg?seed=${onlineUser.name}`;
+                  
+                  return (
+                    <motion.div
+                      key={onlineUser.socketId}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="card-surface rounded-xl overflow-hidden hover:shadow-lg transition-all"
+                    >
+                      {/* User Image */}
+                      <div className="relative aspect-[3/4] overflow-hidden">
+                        <img 
+                          src={userImage}
+                          alt={onlineUser.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${onlineUser.name}`;
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                        
+                        {/* Online indicator */}
+                        <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1">
+                          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                          <span className="text-xs font-medium text-white">Online</span>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-heading font-semibold text-foreground">
+
+                        {/* Name and age overlay */}
+                        <div className="absolute bottom-3 left-3 right-3">
+                          <p className="font-heading font-bold text-white text-xl mb-1">
                             {onlineUser.name}, {onlineUser.age}
                           </p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {onlineUser.bio}
+                          <p className="text-white/80 text-sm flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {onlineUser.country}
                           </p>
                         </div>
-                        <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
                       </div>
-                    </div>
-                    
-                    <div className="flex gap-2 flex-wrap mb-2">
-                      {(onlineUser.interests || []).slice(0, 2).map((interest, idx) => (
-                        <Badge key={idx} variant="secondary" className="text-xs">
-                          {interest}
-                        </Badge>
-                      ))}
-                    </div>
 
-                    <Button
-                      onClick={() => handleSendRequest(onlineUser)}
-                      disabled={sentRequests.includes(onlineUser.socketId)}
-                      className="w-full bg-primary hover:bg-pink-deep text-primary-foreground text-sm"
-                    >
-                      {sentRequests.includes(onlineUser.socketId) ? (
-                        <>✓ Request Sent</>
-                      ) : (
-                        <>
-                          <Heart className="w-4 h-4 mr-2" />
-                          Send Request
-                        </>
-                      )}
-                    </Button>
-                  </motion.div>
-                ))}
+                      {/* User Info */}
+                      <div className="p-4">
+                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                          {onlineUser.bio}
+                        </p>
+                        
+                        {/* Interests */}
+                        {onlineUser.interests && onlineUser.interests.length > 0 && (
+                          <div className="flex gap-2 flex-wrap mb-3">
+                            {onlineUser.interests.slice(0, 3).map((interest, idx) => (
+                              <Badge key={idx} variant="secondary" className="text-xs">
+                                {interest}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Send Request Button */}
+                        <Button
+                          onClick={() => handleSendRequest(onlineUser)}
+                          disabled={sentRequests.includes(onlineUser.socketId)}
+                          className="w-full bg-primary hover:bg-pink-deep text-primary-foreground"
+                        >
+                          {sentRequests.includes(onlineUser.socketId) ? (
+                            <>✓ Request Sent</>
+                          ) : (
+                            <>
+                              <Heart className="w-4 h-4 mr-2" />
+                              Send Request
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
           )}

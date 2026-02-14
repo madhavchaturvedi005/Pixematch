@@ -20,13 +20,20 @@ const Login = () => {
     setLoading(true);
     setError('');
 
+    console.log('🚀 Starting login process...');
+
     try {
       const userData = await authService.login(username, password);
       
+      console.log('✅ Login successful, user data:', userData);
+      console.log('📝 Setting user in context...');
+      
       setUser(userData);
       
+      console.log('✅ User set, navigating to matching...');
       navigate('/matching');
     } catch (err: any) {
+      console.error('❌ Login error:', err);
       setError(err.message);
     } finally {
       setLoading(false);

@@ -10,6 +10,9 @@ interface User {
   country: string;
   flag: string;
   online: boolean;
+  image1?: string;
+  image2?: string;
+  image3?: string;
 }
 
 const UserGrid = () => {
@@ -63,18 +66,22 @@ const UserGrid = () => {
 
   return (
     <div className="grid grid-cols-3 gap-3 auto-rows-auto">
-      {users.map((user, i) => (
-        <UserCard 
-          key={user.id} 
-          image={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`}
-          name={user.name}
-          age={user.age}
-          country={user.country}
-          flag={user.flag}
-          online={user.online}
-          delay={i * 0.1}
-        />
-      ))}
+      {users.map((user, i) => {
+        const userImage = user.image1 || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`;
+        
+        return (
+          <UserCard 
+            key={user.id} 
+            image={userImage}
+            name={user.name}
+            age={user.age}
+            country={user.country}
+            flag={user.flag}
+            online={user.online}
+            delay={i * 0.1}
+          />
+        );
+      })}
     </div>
   );
 };

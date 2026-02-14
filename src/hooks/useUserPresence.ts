@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { AuthUser } from './useAuth';
+import type { AuthUser } from './useAuth';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
@@ -19,28 +19,30 @@ export const useUserPresence = (user: AuthUser | null) => {
     socketRef.current = socket;
 
     socket.on('connect', () => {
-      console.log('Presence registered:', user.name);
+      console.log('Presence registered:', user.username);
+      console.log('User data being sent:', {
+        hasImage1: !!user.image1,
+        hasImage2: !!user.image2,
+        hasImage3: !!user.image3
+      });
       
       socket.emit('register-presence', {
-        name: user.name,
-        age: 25, 
-        gender: 'other',
+        name: user.username,
+        username: user.username,
+        age: user.age || 25, 
+        gender: user.gender || 'other',
         interests: user.interests || [],
-        values: user.values || [],
-        personalityTags: user.personalityTags || [],
-        bio: user.bio || `Hi, I'm ${user.name}!`,
+        bio: user.description || `Hi, I'm ${user.username}!`,
+        description: user.description,
         country: user.country || 'Unknown',
-        flag: user.country === 'South Korea' ? '🇰🇷' : 
-              user.country === 'United States' ? '🇺🇸' : 
-              user.country === 'Brazil' ? '🇧🇷' : 
-              user.country === 'Germany' ? '🇩🇪' : 
-              user.country === 'UAE' ? '🇦🇪' : '🌍',
-        mode: user.mode || 'friendship'
+        image1: user.image1 || null,
+        image2: user.image2 || null,
+        image3: user.image3 || null
       });
     });
 
     socket.on('disconnect', () => {
-      console.log('Presence disconnected:', user.name);
+      console.log('Presence disconnected:', user.username);
     });
 
     return () => {

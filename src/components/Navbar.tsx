@@ -67,15 +67,15 @@ const Navbar = () => {
             Find Match
             <span className="absolute -bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
           </Link>
-          <a 
-            href="#features" 
+          <Link 
+            to="/about" 
             className={`font-medium text-foreground/70 hover:text-foreground transition-colors relative group ${
               isScrolled ? "text-xs px-2 py-1" : "text-base px-3 py-2"
             }`}
           >
-            Features
+            About
             <span className="absolute -bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
-          </a>
+          </Link>
         </div>
       </div>
 
@@ -93,12 +93,12 @@ const Navbar = () => {
                 <div className={`rounded-full bg-gradient-to-br from-primary to-pink-deep flex items-center justify-center font-bold text-white ${
                   isScrolled ? "w-5 h-5 text-[10px]" : "w-8 h-8 text-sm"
                 }`}>
-                  {user?.name?.charAt(0).toUpperCase() || "U"}
+                  {user?.username?.charAt(0).toUpperCase() || "U"}
                 </div>
                 <span className={`text-foreground hidden sm:inline max-w-[100px] truncate ${
                   isScrolled ? "text-xs" : "text-base"
                 }`}>
-                  {user?.name || "User"}
+                  {user?.username || "User"}
                 </span>
                 <ChevronDown className={`text-muted-foreground ${
                   isScrolled ? "w-3 h-3" : "w-4 h-4"
@@ -108,7 +108,7 @@ const Navbar = () => {
             <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-xl border-border/50 rounded-2xl">
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user?.name || "User"}</p>
+                  <p className="text-sm font-medium leading-none">{user?.username || "User"}</p>
                   <p className="text-xs leading-none text-muted-foreground truncate">
                     {user?.email}
                   </p>
@@ -121,15 +121,6 @@ const Navbar = () => {
               >
                 <User className="w-4 h-4 mr-2" />
                 Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => navigate("/matching")}
-                className="cursor-pointer text-sm"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                Start Matching
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 

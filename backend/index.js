@@ -13,13 +13,13 @@ const app = express();
 const server = http.createServer(app);
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://pixematch.vercel.app', "http://localhost:8080"],
+  origin: ['http://localhost:5173', 'http://localhost:8080', 'http://localhost:8081', 'https://pixematch.vercel.app'],
   credentials: true
 }));
 
 const io = socketIo(server, {
   cors: {
-    origin: ['http://localhost:5173', 'https://pixematch.vercel.app'],
+    origin: ['http://localhost:5173', 'http://localhost:8080', 'http://localhost:8081', 'https://pixematch.vercel.app'],
     methods: ["GET", "POST"],
     credentials: true
   },
@@ -47,6 +47,9 @@ io.on('connection', (socket) => {
   socket.on('register-presence', (userData) => {
     console.log(`\n👥 User registering presence:`);
     console.log(`  📝 Name: ${userData.name}`);
+    console.log(`  🖼️  Image1: ${userData.image1 ? 'YES' : 'NO'}`);
+    console.log(`  🖼️  Image2: ${userData.image2 ? 'YES' : 'NO'}`);
+    console.log(`  🖼️  Image3: ${userData.image3 ? 'YES' : 'NO'}`);
     console.log(`  🔌 Socket: ${socket.id}\n`);
     
     browsingUsers.set(socket.id, {
@@ -459,6 +462,7 @@ app.get('/api/users', (req, res) => {
   const users = [];
   
   browsingUsers.forEach((user, socketId) => {
+    console.log('User data:', JSON.stringify(user, null, 2));
     users.push({
       id: socketId,
       name: user.name || user.username,
@@ -468,7 +472,10 @@ app.get('/api/users', (req, res) => {
       interests: user.interests || [],
       bio: user.bio || user.description || `Hi, I'm ${user.name}!`,
       country: user.country || 'Unknown',
-      socketId: socketId
+      socketId: socketId,
+      image1: user.image1 || null,
+      image2: user.image2 || null,
+      image3: user.image3 || null
     });
   });
   

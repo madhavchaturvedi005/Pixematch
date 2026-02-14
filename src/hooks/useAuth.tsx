@@ -34,27 +34,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const initAuth = async () => {
+      console.log('🔄 Initializing auth...');
       try {
         const token = localStorage.getItem('token');
+        console.log('🔑 Token found:', !!token);
         
         if (token) {
+          console.log('📥 Fetching current user...');
           const currentUser = await authService.getCurrentUser();
           
           if (currentUser) {
+            console.log('✅ User loaded:', currentUser.username);
             setUser(currentUser);
             setIsLoggedIn(true);
           } else {
+            console.log('❌ No user data, logging out');
             authService.logout();
             setUser(null);
             setIsLoggedIn(false);
           }
+        } else {
+          console.log('ℹ️ No token found');
         }
       } catch (error) {
-        console.error('Auth initialization error:', error);
+        console.error('❌ Auth initialization error:', error);
         authService.logout();
         setUser(null);
         setIsLoggedIn(false);
       } finally {
+        console.log('✅ Auth initialization complete');
         setLoading(false);
       }
     };
@@ -70,6 +78,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const setUserAndLogin = (userData: User | null) => {
+    console.log('🔄 setUserAndLogin called with:', userData);
+    setUser(userData);
+    setIsLoggedIn(!!userData);
+    if (userData) {
+      localStorage.setItem('user', JSON.stringify(userData));
+    }
+  };
+
   const logout = () => {
     authService.logout();
     setUser(null);
@@ -77,11 +94,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn, loading, updateProfile, logout, setUser }}>
+    <AuthContext.Provider value={{ user, isLoggedIn, loading, updateProfile, logout, setUser: setUserAndLogin }}>
       {children}
     </AuthContext.Provider>
   );
 };
+
+export type AuthUser = User;
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
