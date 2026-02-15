@@ -190,6 +190,9 @@ useEffect(() => {
         gender: user.gender || 'other',
         interests: user.interests || [],
         bio: user.description || `Hi, I'm ${user.username}!`,
+        image1: user.image1 || null,
+        image2: user.image2 || null,
+        image3: user.image3 || null
       },
       toSocketId: targetUser.socketId
     });
@@ -415,8 +418,15 @@ const handleAcceptRequest = (request: MatchRequest) => {
                   >
                     <div className="mb-3">
                       <div className="flex items-center gap-2 mb-1">
-                        <div className="w-10 h-10 rounded-full bg-primary/30 flex items-center justify-center font-bold">
-                          {request.from.name[0]}
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/30 flex-shrink-0">
+                          <img 
+                            src={request.from.image1 || `https://api.dicebear.com/7.x/avataaars/svg?seed=${request.from.name}`}
+                            alt={request.from.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${request.from.name}`;
+                            }}
+                          />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-sm text-foreground">
@@ -502,8 +512,15 @@ const handleAcceptRequest = (request: MatchRequest) => {
                       >
                         <div className="mb-3">
                           <div className="flex items-center gap-2 mb-1">
-                            <div className="w-10 h-10 rounded-full bg-primary/30 flex items-center justify-center font-bold">
-                              {request.from.name[0]}
+                            <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/30 flex-shrink-0">
+                              <img 
+                                src={request.from.image1 || `https://api.dicebear.com/7.x/avataaars/svg?seed=${request.from.name}`}
+                                alt={request.from.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${request.from.name}`;
+                                }}
+                              />
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="font-semibold text-sm text-foreground">
