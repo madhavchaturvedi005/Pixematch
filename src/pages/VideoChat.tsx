@@ -16,7 +16,11 @@ const VideoChat = () => {
   const location = useLocation();
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
-  const [showChat, setShowChat] = useState(true);
+  
+  // Check if mobile view (screen width < 768px)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [showChat, setShowChat] = useState(!isMobile); // Closed on mobile, open on desktop
+  
   const [message, setMessage] = useState("");
 
   const routePartner = (location.state as { partner?: any; initiator?: boolean })?.partner;
@@ -46,6 +50,21 @@ const VideoChat = () => {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
+
+  // Handle window resize to detect mobile/desktop
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      // Only auto-close chat when switching to mobile, don't auto-open when switching to desktop
+      if (mobile && showChat) {
+        setShowChat(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [showChat]);
 
   useEffect(() => {
     if (localVideoRef.current && localStream) {
@@ -232,10 +251,12 @@ useEffect(() => {
         {/* Chat Sidebar */}
         {showChat && (
           <motion.div
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 320, opacity: 1 }}
-            exit={{ width: 0, opacity: 0 }}
-            className="border-l border-border bg-card flex flex-col w-80 shrink-0"
+            initial={{ x: isMobile ? 320 : 0, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: isMobile ? 320 : 0, opacity: 0 }}
+            className={`border-l border-border bg-card flex flex-col w-80 shrink-0 ${
+              isMobile ? 'absolute right-0 top-0 bottom-0 z-20 shadow-2xl' : ''
+            }`}
           >
             <div className="p-3 border-b border-border flex items-center justify-between">
               <span className="pixel-tag text-primary">CHAT</span>
