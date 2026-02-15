@@ -41,6 +41,7 @@ const Matching = () => {
   const [sentRequests, setSentRequests] = useState<string[]>([]);
   const [activeMatch, setActiveMatch] = useState<OnlineUser | null>(null);
   const [showMobileRequests, setShowMobileRequests] = useState(true);
+  const [rejectedUsers, setRejectedUsers] = useState<string[]>([]);
 
 useEffect(() => {
   if (!socket) return;
@@ -200,6 +201,11 @@ useEffect(() => {
     setSentRequests(prev => [...prev, targetUser.socketId]);
   };
 
+  const handleRejectUser = (userId: string) => {
+    console.log(`❌ Rejecting user: ${userId}`);
+    setRejectedUsers(prev => [...prev, userId]);
+  };
+
 const handleAcceptRequest = (request: MatchRequest) => {
   if (!socket) return;
 
@@ -307,7 +313,9 @@ const handleAcceptRequest = (request: MatchRequest) => {
           ) : (
             <div className="flex-1 overflow-y-auto pr-2">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {onlineUsers.map((onlineUser) => {
+                {onlineUsers
+                  .filter(onlineUser => !rejectedUsers.includes(onlineUser.socketId))
+                  .map((onlineUser) => {
                   const userImage = onlineUser.image1 || `https://api.dicebear.com/7.x/avataaars/svg?seed=${onlineUser.name}`;
                   
                   return (
@@ -315,6 +323,7 @@ const handleAcceptRequest = (request: MatchRequest) => {
                       key={onlineUser.socketId}
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
                       className="card-surface rounded-xl overflow-hidden hover:shadow-lg transition-all"
                     >
                       {/* User Image */}
@@ -365,20 +374,31 @@ const handleAcceptRequest = (request: MatchRequest) => {
                         )}
 
                         {/* Send Request Button */}
-                        <Button
-                          onClick={() => handleSendRequest(onlineUser)}
-                          disabled={sentRequests.includes(onlineUser.socketId)}
-                          className="w-full bg-primary hover:bg-pink-deep text-primary-foreground"
-                        >
-                          {sentRequests.includes(onlineUser.socketId) ? (
-                            <>✓ Request Sent</>
-                          ) : (
-                            <>
-                              <Heart className="w-4 h-4 mr-2" />
-                              Send Request
-                            </>
-                          )}
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => handleSendRequest(onlineUser)}
+                            disabled={sentRequests.includes(onlineUser.socketId)}
+                            className="flex-1 bg-primary hover:bg-pink-deep text-primary-foreground"
+                          >
+                            {sentRequests.includes(onlineUser.socketId) ? (
+                              <>✓ Request Sent</>
+                            ) : (
+                              <>
+                                <Heart className="w-4 h-4 mr-2" />
+                                Send Request
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            onClick={() => handleRejectUser(onlineUser.socketId)}
+                            variant="outline"
+                            size="icon"
+                            className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive"
+                            title="Not interested"
+                          >
+                            <X className="w-5 h-5" />
+                          </Button>
+                        </div>
                       </div>
                     </motion.div>
                   );
