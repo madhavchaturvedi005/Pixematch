@@ -82,6 +82,15 @@ const Navbar = () => {
             About
             <span className="absolute -bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
           </Link>
+          <Link 
+            to="https://github.com/madhavchaturvedi005/Pixematch" 
+            className={`font-medium text-foreground/70 hover:text-foreground transition-colors relative group ${
+              isScrolled ? "text-xs px-2 py-1" : "text-base px-3 py-2"
+            }`}
+          >
+            Contribute?
+            <span className="absolute -bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
+          </Link>
         </div>
       </div>
 
