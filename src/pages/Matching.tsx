@@ -86,38 +86,6 @@ useEffect(() => {
 }, [socket, navigate]);
 
   useEffect(() => {
-    if (!socket) return;
-
-    socket.on('match-request-received', (data: { from: OnlineUser; fromSocketId: string }) => {
-      console.log('📩 Incoming match request from:', data.from.name);
-      setIncomingRequests(prev => [...prev, {
-        from: data.from,
-        fromSocketId: data.fromSocketId,
-        timestamp: Date.now()
-      }]);
-    });
-
-    socket.on('match-request-accepted', (data: { partner: OnlineUser }) => {
-      console.log('✅ Match request accepted! Partner:', data.partner.name);
-      setActiveMatch(data.partner);
-      setTimeout(() => {
-        navigate('/chat/new', { state: { partner: data.partner, initiator: false } });
-      }, 300);
-    });
-
-    socket.on('match-request-declined', () => {
-      console.log('❌ Match request was declined');
-      setSentRequests(prev => prev.filter(id => id !== currentIndex.toString()));
-    });
-
-    return () => {
-      socket.off('match-request-received');
-      socket.off('match-request-accepted');
-      socket.off('match-request-declined');
-    };
-  }, [socket, navigate]);
-
-  useEffect(() => {
     if (!isMatching) return;
 
     const fetchOnlineUsers = async () => {
